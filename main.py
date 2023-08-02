@@ -4,14 +4,13 @@ import json
 import os
 import random
 import traceback
-import uuid
 import emoji
 import httpx
 import claude
-import time
 
 from SydneyGPT.SydneyGPT import Chatbot
 from aiohttp import web
+from aiohttp.client_exceptions import ClientConnectorError
 
 public_dir = '/public'
 
@@ -22,9 +21,9 @@ async def sydney_process_message(user_message, context, _U, locale, imgid):
     for i in range(max_retries + 1):
         try:
             if _U:
-                cookies = loaded_cookies + [{"name": "_U", "value": _U}]
+                cookies = list(filter(lambda d: d.get('name') != '_U', loaded_cookies)) + [{"name": "_U", "value": _U}]
             else:
-                cookies = loaded_cookies + [{"name": "_U", "value": str(uuid.uuid4())}]
+                cookies = loaded_cookies
             chatbot = await Chatbot.create(cookies=cookies, proxy=args.proxy, imgid=imgid)
             async for _, response in chatbot.ask_stream(prompt=user_message, conversation_style="creative", raw=True,
                                                         webpage_context=context, search_result=True, locale=locale):
@@ -34,13 +33,13 @@ async def sydney_process_message(user_message, context, _U, locale, imgid):
             if (
                 isinstance(e, TimeoutError)
                 or isinstance(e, httpx.ConnectError)
-                or isinstance(e, ConnectionResetError)
+                or isinstance(e, ClientConnectorError)
                 or "Sorry, you need to login first to access this service." in str(e)
                 or "ServiceClient failure for DeepLeo" in str(e)
             ) and i < max_retries:
                 print("Retrying...", i + 1, "attempts.")
                 # wait two second
-                time.sleep(2)
+                await asyncio.sleep(2)
             else:
                 if i == max_retries:
                     print("Failed after", max_retries, "attempts.")

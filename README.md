@@ -1,6 +1,9 @@
+欢迎到slack来tree new bing。https://join.slack.com/t/chatsydneycomminicate/shared_invite/zt-1x7tjzgdz-v71xazsoE206kJwFuyf1rA
+
+
 # ChatSydney
 中国用户请设置能翻墙的系统代理 Chinese users, please set up a system proxy that can bypass the GFW.  
-如果遇到websocket报200的话请尝试添加cookies.json文件。
+使用的时候最好添加cookies.json文件。
 
 
 ## Installation
